@@ -20,6 +20,14 @@
     <name>CBF Framework</name>
     <description>CBF 企业级后端框架</description>
 
+    <modules>
+        <module>cbf-common</module>
+        <module>cbf-starter-data</module>
+        <module>cbf-starter-web</module>
+        <module>cbf-starter-cache</module>
+        <module>cbf-demo</module>
+    </modules>
+
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
