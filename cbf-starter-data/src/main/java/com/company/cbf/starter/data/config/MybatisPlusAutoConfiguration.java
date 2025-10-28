@@ -1,8 +1,8 @@
 package com.company.cbf.starter.data.config;
 
 //import com.baomidou.mybatisplus.annotation.DbType;
+
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-//import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.company.cbf.common.constant.CommonConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;

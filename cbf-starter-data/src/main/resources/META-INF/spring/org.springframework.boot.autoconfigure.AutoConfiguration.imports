@@ -1,1 +1,4 @@
+# 数据访问配置类
 com.company.cbf.starter.data.config.CbfDataAutoConfiguration
+# Mqtt转发配置类
+com.company.cbf.starter.mqtt.config.MqttAutoConfiguration
