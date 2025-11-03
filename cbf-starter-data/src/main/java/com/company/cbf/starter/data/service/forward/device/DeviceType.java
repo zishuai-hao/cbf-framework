@@ -1,4 +1,4 @@
-package com.company.cbf.starter.data.entity.device;
+package com.company.cbf.starter.data.service.forward.device;
 
 import lombok.Getter;
 
@@ -10,7 +10,7 @@ import lombok.Getter;
  * @date 2023/12/02
  */
 @Getter
-public enum DeviceType {
+public enum DeviceType  {
 
     // 环境
     RHS("温湿度监测") { // 温度, 湿度

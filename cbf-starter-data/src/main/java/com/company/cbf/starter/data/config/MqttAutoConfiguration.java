@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Bean;
  */
 @Slf4j
 @AutoConfiguration
-@EnableConfigurationProperties(ForwardMqttConfig.class) // 注册并加载 ForwardMqttConfig 类，使其成为 Spring Bean
+@EnableConfigurationProperties(ForwardMqttProperties.class) // 注册并加载 ForwardMqttConfig 类，使其成为 Spring Bean
 @ConditionalOnProperty(prefix = "mqtt-config", name = "enable", havingValue = "true") // 只有当配置文件中存在 "mqtt-config.enable=true" 或其他条件时才激活
 public class MqttAutoConfiguration {
 
@@ -30,7 +30,7 @@ public class MqttAutoConfiguration {
     // 2. 配置并创建 MqttClient 实例作为 Bean
     @Bean
     @ConditionalOnMissingBean // 允许用户提供自己的 MqttClient Bean
-    public MqttClient mqttClient(Vertx vertx, ForwardMqttConfig config) {
+    public MqttClient mqttClient(Vertx vertx, ForwardMqttProperties config) {
         log.info("开始配置 MqttClientOptions...");
 
         final MqttClientOptions mqttClientOptions = new MqttClientOptions();

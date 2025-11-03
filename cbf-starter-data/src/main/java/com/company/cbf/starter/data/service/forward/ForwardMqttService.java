@@ -1,6 +1,6 @@
 package com.company.cbf.starter.data.service.forward;
 
-import com.company.cbf.starter.data.config.ForwardMqttConfig;
+import com.company.cbf.starter.data.config.ForwardMqttProperties;
 import io.vertx.core.Vertx;
 import io.vertx.mqtt.MqttClient;
 import jakarta.annotation.PostConstruct;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ForwardMqttService {
 
-    private final ForwardMqttConfig config;
+    private final ForwardMqttProperties config;
     private final MqttClient mqttClient; // MqttClient 现在是注入进来的 Bean
     private final Vertx vertx;
     private final ApplicationEventPublisher applicationEventPublisher;

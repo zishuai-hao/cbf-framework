@@ -12,7 +12,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @Data
 @ConfigurationProperties(prefix = "mqtt-config")
-public class ForwardMqttConfig {
+public class ForwardMqttProperties {
     private String url;
     private Integer port;
     private String topic;

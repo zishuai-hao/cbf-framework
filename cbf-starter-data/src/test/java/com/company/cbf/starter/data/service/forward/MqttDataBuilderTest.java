@@ -2,7 +2,7 @@ package com.company.cbf.starter.data.service.forward;
 
 import com.company.cbf.starter.data.entity.MqttData;
 import com.company.cbf.starter.data.entity.MqttPubProtocol;
-import com.company.cbf.starter.data.entity.device.DeviceType;
+import com.company.cbf.starter.data.service.forward.device.DeviceType;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package com.company.cbf.starter.data.entity.device;
+package com.company.cbf.starter.data.service.forward.device;
 
 import java.util.List;
 

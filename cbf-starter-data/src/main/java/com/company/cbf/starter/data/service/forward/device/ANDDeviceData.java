@@ -1,30 +1,30 @@
-package com.company.cbf.starter.data.entity.device;
+package com.company.cbf.starter.data.service.forward.device;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * VID设备数据（船舶撞击监测）
+ * AND设备数据（位移变化监测）
  *
  * @author hzs
  * @date 2023/12/02
  */
-public class VIDDeviceData implements DeviceDataProvider {
+public class ANDDeviceData implements DeviceDataProvider {
     
     /**
      * 设备类型常量（保持向后兼容）
      */
-    public static final DeviceType DEVICE_TYPE = DeviceType.VID;
+    public static final DeviceType DEVICE_TYPE = DeviceType.AND;
     
     @Override
     public DeviceType getDeviceType() {
-        return DeviceType.VID;
+        return DeviceType.AND;
     }
     
     @Override
     public List<String> format(String... params) {
         if (params.length != 3) {
-            throw new IllegalArgumentException("VID设备需要3个参数：横桥向, 纵桥向, 竖向");
+            throw new IllegalArgumentException("AND设备需要3个参数：横桥向, 纵桥向, 竖向");
         }
         return Arrays.asList(params[0], params[1], params[2]);
     }

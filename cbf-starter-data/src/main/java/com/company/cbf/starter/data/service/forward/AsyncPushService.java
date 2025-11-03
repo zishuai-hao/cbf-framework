@@ -1,6 +1,6 @@
 package com.company.cbf.starter.data.service.forward;
 
-import com.company.cbf.starter.data.config.ForwardMqttConfig;
+import com.company.cbf.starter.data.config.ForwardMqttProperties;
 import com.company.cbf.starter.data.entity.MqttPubProtocol;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.codec.mqtt.MqttQoS;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AsyncPushService {
     private final MqttClient mqttClient;
-    private final ForwardMqttConfig mqttConfig;
+    private final ForwardMqttProperties mqttConfig;
     private final ObjectMapper objectMapper;
 
     public void push(MqttPubProtocol data) {

@@ -6,9 +6,9 @@ import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.company.cbf.common.constant.CommonConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
 
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
  * @since 1.0.0
  */
 @Slf4j
-@Configuration
+@MapperScan("com.company.cbf.starter.data.mapper")
 public class MybatisPlusAutoConfiguration {
 
     /**
