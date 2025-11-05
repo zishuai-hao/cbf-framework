@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
  * @date 2023/07/14
  */
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class ForwardMqttService {
 

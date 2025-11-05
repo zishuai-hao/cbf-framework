@@ -1,5 +1,9 @@
 package com.company.cbf.starter.data.config;
 
+import com.company.cbf.starter.data.service.forward.AsyncBufferPushService;
+import com.company.cbf.starter.data.service.forward.AsyncPushService;
+import com.company.cbf.starter.data.service.forward.ForwardMqttService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.Vertx;
 import io.vertx.mqtt.MqttClient;
 import io.vertx.mqtt.MqttClientOptions;
@@ -8,7 +12,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author hzs
@@ -17,12 +23,38 @@ import org.springframework.context.annotation.Bean;
 @Slf4j
 @AutoConfiguration
 @EnableConfigurationProperties(ForwardMqttProperties.class) // 注册并加载 ForwardMqttConfig 类，使其成为 Spring Bean
-@ConditionalOnProperty(prefix = "mqtt-config", name = "enable", havingValue = "true") // 只有当配置文件中存在 "mqtt-config.enable=true" 或其他条件时才激活
+
 public class MqttAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "mqtt-config", name = "enable", havingValue = "true")
+    public AsyncPushService asyncPushService(MqttClient mqttClient, ForwardMqttProperties config, ObjectMapper om) {
+        // 假设 AsyncPushService 依赖 MqttClient 和配置
+        return new AsyncPushService(mqttClient, config, om);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "mqtt-config", name = "enable", havingValue = "true")
+    public AsyncBufferPushService asyncBufferPushService(AsyncPushService asyncPushService, ForwardMqttProperties config, Vertx vertx) {
+        return new AsyncBufferPushService(asyncPushService, config, vertx);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "mqtt-config", name = "enable", havingValue = "true")
+    public ForwardMqttService forwardMqttService(MqttClient mqttClient, ForwardMqttProperties config,
+                                                 Vertx vertx, ApplicationEventPublisher publisher) {
+        // 假设 ForwardMqttService 依赖 MqttClient
+        return new ForwardMqttService(config, mqttClient, vertx, publisher);
+    }
 
     // 1. 提供 Vertx 实例作为 Bean
     @Bean
     @ConditionalOnMissingBean // 允许用户提供自己的 Vertx Bean
+    @ConditionalOnProperty(prefix = "mqtt-config", name = "enable", havingValue = "true")
+
     public Vertx vertx() {
         return Vertx.vertx();
     }
@@ -30,6 +62,7 @@ public class MqttAutoConfiguration {
     // 2. 配置并创建 MqttClient 实例作为 Bean
     @Bean
     @ConditionalOnMissingBean // 允许用户提供自己的 MqttClient Bean
+    @ConditionalOnProperty(prefix = "mqtt-config", name = "enable", havingValue = "true")
     public MqttClient mqttClient(Vertx vertx, ForwardMqttProperties config) {
         log.info("开始配置 MqttClientOptions...");
 

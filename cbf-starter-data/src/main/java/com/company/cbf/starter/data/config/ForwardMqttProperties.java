@@ -22,6 +22,7 @@ public class ForwardMqttProperties {
     private boolean enable;
     private String clientId; // 新增，允许配置 client ID
     private Integer reconnectInterval; // 新增，允许配置重连间隔
+    private Long sendIntervalMs; // 新增，允许配置发送间隔
 
 
     public String getStandardTopic() {

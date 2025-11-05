@@ -53,15 +53,24 @@ public class MqttDataBuilder {
     /**
      * 添加数据（使用 DeviceType 的格式化器）
      *
-     * @param timeStr       时间字符串
-     * @param formattedData 已格式化的数据列表
+     * @param timeStr 时间字符串
+     * @param params  参数列表
      */
     public MqttDataBuilder addData(String timeStr, String... params) {
         List<String> formattedData = deviceType.createDataProvider().format(params);
+        return this.addData(timeStr, formattedData);
+    }
+
+    public MqttDataBuilder addData(String timeStr, List<String> formattedData) {
         List<String> dataPoint = new ArrayList<>();
         dataPoint.add(timeStr);
         dataPoint.addAll(formattedData);
         this.value.add(dataPoint);
+        return this;
+    }
+
+    public MqttDataBuilder addTimedData(List<String> timedData) {
+        this.value.add(timedData);
         return this;
     }
 
@@ -73,6 +82,16 @@ public class MqttDataBuilder {
     public MqttDataBuilder addCurrentTimeData(String... formattedData) {
         String currentTimeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
         return addData(currentTimeStr, formattedData);
+    }
+
+    /**
+     * 添加当前时间的数据
+     *
+     * @param formattedData 已格式化的数据列表
+     */
+    public MqttDataBuilder addCurrentTimeData(List<String> formattedData) {
+        String currentTimeStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        return addData(currentTimeStr, String.valueOf(formattedData));
     }
 
     /**
