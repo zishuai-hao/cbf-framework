@@ -4,6 +4,7 @@ import com.company.cbf.starter.data.entity.MqttData;
 import com.company.cbf.starter.data.service.forward.device.DeviceType;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class MqttDataBuilder {
     private String monitoringCode;
     private final DeviceType deviceType;
     private final List<List<String>> value = new ArrayList<>();
-
+    public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
     public MqttDataBuilder(DeviceType deviceType) {
         this.deviceType = deviceType;
     }
@@ -59,6 +60,15 @@ public class MqttDataBuilder {
     public MqttDataBuilder addData(String timeStr, String... params) {
         List<String> formattedData = deviceType.createDataProvider().format(params);
         return this.addData(timeStr, formattedData);
+    }
+
+    public MqttDataBuilder addData(ZonedDateTime time, String... params) {
+        List<String> formattedData = deviceType.createDataProvider().format(params);
+        return this.addData(time.format(TIME_FORMATTER), formattedData);
+    }
+
+    public MqttDataBuilder addData(ZonedDateTime time, List<String> formattedData) {
+        return this.addData(time.format(TIME_FORMATTER), formattedData);
     }
 
     public MqttDataBuilder addData(String timeStr, List<String> formattedData) {

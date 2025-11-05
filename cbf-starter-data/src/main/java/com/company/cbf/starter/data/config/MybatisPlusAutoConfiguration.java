@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
  * @since 1.0.0
  */
 @Slf4j
-@MapperScan("com.company.cbf.starter.data.mapper")
+//@MapperScan("com.company.cbf.starter.data.mapper")
 public class MybatisPlusAutoConfiguration {
 
     /**

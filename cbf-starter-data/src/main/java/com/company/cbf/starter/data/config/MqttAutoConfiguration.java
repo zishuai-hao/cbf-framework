@@ -1,6 +1,6 @@
 package com.company.cbf.starter.data.config;
 
-import com.company.cbf.starter.data.service.forward.AsyncBufferPushService;
+import com.company.cbf.starter.data.service.forward.AsyncBufferPushAdapter;
 import com.company.cbf.starter.data.service.forward.AsyncPushService;
 import com.company.cbf.starter.data.service.forward.ForwardMqttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +14,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 
 /**
  * @author hzs
@@ -37,8 +36,8 @@ public class MqttAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "mqtt-config", name = "enable", havingValue = "true")
-    public AsyncBufferPushService asyncBufferPushService(AsyncPushService asyncPushService, ForwardMqttProperties config, Vertx vertx) {
-        return new AsyncBufferPushService(asyncPushService, config, vertx);
+    public AsyncBufferPushAdapter asyncBufferPushAdapter(AsyncPushService asyncPushService, ForwardMqttProperties config, Vertx vertx) {
+        return new AsyncBufferPushAdapter(asyncPushService, config, vertx);
     }
 
     @Bean

@@ -26,11 +26,11 @@ public class ForwardMqttProperties {
 
 
     public String getStandardTopic() {
-        return "bridge_mon/" + dataTag + "/standard";
+        return "bridge_mon/" + topic + "/standard";
     }
 
     public String getLightweightTopic() {
-        return "bridge_mon/" + dataTag + "/lightweight";
+        return "bridge_mon/" + topic + "/lightweight";
     }
 
 }

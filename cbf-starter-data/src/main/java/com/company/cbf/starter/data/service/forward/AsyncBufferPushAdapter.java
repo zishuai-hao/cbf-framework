@@ -16,11 +16,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 异步批量推送服务 - 装饰器模式
+ * 异步批量推送服务 - 适配器模式
  * 包装 AsyncPushService，添加批量缓存和定时发送功能
  * <p>
  * 功能特性：
- * 1. 按采集仪编号(cjyNo)分组缓存数据
+ * 1. 按设备ID分组缓存数据
  * 2. 支持两种触发条件：数据条数达到阈值或时间间隔达到阈值
  * 3. 自动定时发送缓存数据
  * 4. 提供强制发送接口
@@ -30,18 +30,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class AsyncBufferPushService {
+public class AsyncBufferPushAdapter {
 
     private final AsyncPushService asyncPushService;
     private final ForwardMqttProperties config;
     private final Vertx vertx;
+
     /**
-     * 按采集仪编号分组的数据缓存
-     * key: deviceId (采集仪编号)
-     * value: 数据列表
+     * 按设备编号分组的数据缓存
      */
     private final Map<String, DeviceBuffer> deviceDataBuffer = new ConcurrentHashMap<>();
-
     /**
      * 每个设备的最后发送时间
      */
@@ -49,6 +47,7 @@ public class AsyncBufferPushService {
 
     private final Long MAX_BUFFER_SIZE = 100L;  // 最大缓存条数
     private Long timerId;
+    private Long sendInterval;
 
     /**
      * 内部类，用于封装每个设备的缓存数据。
@@ -69,6 +68,7 @@ public class AsyncBufferPushService {
             log.info("AsyncBufferPushService 未启用。");
             return;
         }
+        this.sendInterval = config.getSendIntervalMs();
         // 启动定时发送任务
         startScheduledSendTask();
         log.info("AsyncBufferPushService 初始化完成，最大缓存: {} 条，发送间隔: {}ms",
@@ -85,19 +85,19 @@ public class AsyncBufferPushService {
             return;
         }
 
-        // 如果buffer中某个设备数据过多则直接推送
-        deviceDataBuffer.compute(mqttData.getDeviceId(), (key, existingBuffer) -> {
-            if (existingBuffer == null) {
-                return mqttData;
-            } else {
-                // 合并两个mqttData数据
-                existingBuffer.getValue().addAll(mqttData.getValue());
+        // 确保原子性的更新缓存
+        deviceDataBuffer.compute(mqttData.getDeviceId(), (deviceId, buffer) -> {
+            if (buffer == null) {
+                buffer = new DeviceBuffer(mqttData.getDeviceType());
             }
-            if (existingBuffer.getValue().size() >= MAX_BUFFER_SIZE) {
-                // 达到阈值，触发发送
-                sendBufferedData(mqttData.getDeviceId());
+
+            // 因为对同一个 key 的 compute 是原子的，所以这里的 addAll 是线程安全的
+            buffer.values.addAll(mqttData.getValue());
+
+            if (buffer.values.size() >= MAX_BUFFER_SIZE) {
+                vertx.runOnContext(v -> sendAndClearBuffer(deviceId));
             }
-            return existingBuffer;
+            return buffer;
         });
     }
 
@@ -105,25 +105,21 @@ public class AsyncBufferPushService {
      * 启动定时发送任务
      */
     private void startScheduledSendTask() {
-        long sendInterval = config.getSendIntervalMs();
-
         timerId = vertx.setPeriodic(sendInterval, id -> {
             // 确保定时器回调中的代码是非阻塞的
             long currentTime = System.currentTimeMillis();
 
-            // 遍历 keySet 是线程安全的
+            // TODO 目前设计只支持少量设备（少于100） 如果设备增多，则无法使用这种方式推送
             deviceDataBuffer.keySet().forEach(deviceId -> {
                 Long lastSendTime = lastSendTimes.getOrDefault(deviceId, 0L);
-                if (currentTime - lastSendTime < sendInterval) {
-                    return;
+                if (currentTime - lastSendTime >= sendInterval) {
+                    sendAndClearBuffer(deviceId);
                 }
-                sendBufferedData(deviceId);
             });
         });
 
         log.info("定时发送任务已启动，检查间隔: {} ms", config.getSendIntervalMs());
     }
-
 
     /**
      * 强制发送指定设备的所有缓存数据
@@ -134,7 +130,7 @@ public class AsyncBufferPushService {
         if (deviceId == null) {
             return;
         }
-        sendBufferedData(deviceId);
+        sendAndClearBuffer(deviceId);
     }
 
     /**
@@ -144,35 +140,38 @@ public class AsyncBufferPushService {
         if (!config.isEnable()) {
             return;
         }
-        deviceDataBuffer.keySet().forEach(this::sendBufferedData);
+        // 创建快找，避免并发修改异常
+        new ArrayList<>(deviceDataBuffer.keySet()).forEach(this::sendAndClearBuffer);
     }
 
     /**
      * 发送指定设备的缓存数据
      */
-    private void sendBufferedData(String deviceId) {
-        MqttData mqttData = deviceDataBuffer.get(deviceId);
-        if (mqttData == null) {
+    private void sendAndClearBuffer(String deviceId) {
+        // 确保线程安全的移除和获取缓存
+        DeviceBuffer bufferToSend = deviceDataBuffer.remove(deviceId);
+
+        if (bufferToSend == null || bufferToSend.values.isEmpty()) {
             return;
         }
 
-        synchronized (mqttData) {
-            deviceDataBuffer.remove(deviceId);
-        }
+        lastSendTimes.put(deviceId, System.currentTimeMillis());
+        MqttData dataToSend = new MqttData();
 
         try {
-            // 更新当前时间为发送时间
-            mqttData.setSampleTime(System.currentTimeMillis());
-            final MqttPubProtocol zd001 = new MqttPubProtocol(config.getDataTag(), Collections.singletonList(mqttData));
+            dataToSend.setDeviceId(deviceId);
+            dataToSend.setDeviceType(bufferToSend.deviceType);
+            dataToSend.setValue(bufferToSend.values);
+            dataToSend.setSampleTime(System.currentTimeMillis());
+
+            final MqttPubProtocol protocol = new MqttPubProtocol(config.getDataTag(), Collections.singletonList(dataToSend));
 
             // 调用被装饰的 AsyncPushService
-            asyncPushService.push(zd001);
+            asyncPushService.push(protocol);
 
-            // 更新最后发送时间
-            lastSendTimes.computeIfAbsent(deviceId, k -> System.currentTimeMillis());
-            log.debug("发送缓存数据成功，设备: {}，数据条数: {}", deviceId, mqttData.getValue().size());
+            log.debug("发送缓存数据成功，设备: {}，数据条数: {}", deviceId, dataToSend.getValue().size());
         } catch (Exception e) {
-            log.error("发送缓存数据失败，设备: {}，数据条数: {}", deviceId, mqttData.getValue().size(), e);
+            log.error("发送缓存数据失败，设备: {}，数据条数: {}", deviceId, dataToSend.getValue().size(), e);
         }
     }
 

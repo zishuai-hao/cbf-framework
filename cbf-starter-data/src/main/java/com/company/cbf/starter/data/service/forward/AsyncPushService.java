@@ -8,7 +8,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.mqtt.MqttClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 /**
  * @author hzs
