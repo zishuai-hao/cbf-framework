@@ -28,6 +28,6 @@ public class MqttPubProtocol {
      * MQTT数据列表
      */
     @JsonProperty("mqtt_data")
-    private List<MqttData> mqttData;
+    private List<MqttData> mqttDataList;
 }
 
