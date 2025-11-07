@@ -23,7 +23,7 @@ public class ForwardMqttProperties {
     private String clientId; // 新增，允许配置 client ID
     private Integer reconnectInterval; // 新增，允许配置重连间隔
     private Long sendIntervalMs; // 新增，允许配置发送间隔
-
+    private boolean useStandardTopic; // 新增，允许配置是否使用标准化主题
 
     public String getStandardTopic() {
         return "bridge_mon/" + topic + "/standard";

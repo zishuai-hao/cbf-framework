@@ -23,7 +23,13 @@ public class AsyncPushService {
     public void push(MqttPubProtocol data) {
         try {
             final String jsonStr = objectMapper.writeValueAsString(data);
-            final String topic = mqttConfig.getLightweightTopic();
+
+            final String topic; // 先声明变量，但不初始化
+            if (mqttConfig.isUseStandardTopic()) { // 判断 boolean 表达式
+                topic = mqttConfig.getStandardTopic(); // 如果为 true，赋值标准主题
+            } else {
+                topic = mqttConfig.getLightweightTopic(); // 如果为 false，赋值轻量级主题
+            }
 
             // 推送MQTT消息
             if (mqttClient != null && mqttClient.isConnected()) {
