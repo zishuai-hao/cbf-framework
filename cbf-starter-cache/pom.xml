@@ -8,8 +8,7 @@
     <parent>
         <groupId>com.company.cbf</groupId>
         <artifactId>cbf-framework</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>cbf-starter-cache</artifactId>
