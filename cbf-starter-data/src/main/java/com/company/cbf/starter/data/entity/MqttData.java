@@ -20,7 +20,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MqttData {
-    
     /**
      * 时间戳（毫秒）
      */
@@ -48,4 +47,5 @@ public class MqttData {
      */
     @JsonProperty("value")
     private List<List<String>> value;
+    
 }
